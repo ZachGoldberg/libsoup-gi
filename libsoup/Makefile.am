@@ -193,3 +193,94 @@ EXTRA_DIST=				\
 	soup-marshal.list		\
 	soup-enum-types.h.tmpl		\
 	soup-enum-types.c.tmpl
+
+SCANNER_BIN = g-ir-scanner
+SCANNER_PYTHONPATH = $(top_builddir):$(top_srcdir):$$PYTHONPATH
+SCANNER_ENV = env PYTHONPATH=$(SCANNER_PYTHONPATH) \
+        UNINSTALLED_INTROSPECTION_SRCDIR=$(top_srcdir) \
+        UNINSTALLED_INTROSPECTION_BUILDDIR=$(top_builddir)
+SCANNER_ARGS = -v --add-include-path=.
+SCANNER = $(AM_V_GEN) env LPATH=.libs $(CHECK_DEBUG) $(SCANNER_ENV) $(SCANNER_BIN) $(SCANNER_ARGS)
+SCANNER_LIBS = \
+        $(top_srcdir)/giscanner/*.py \
+        $(top_builddir)/giscanner/libgiscanner.la \
+        $(top_builddir)/girepository/libgirepository-1.0.la
+
+GLIB_INCLUDEDIR=`pkg-config --variable=includedir glib-2.0`/glib-2.0
+GLIB_LIBDIR=`pkg-config --variable=libdir glib-2.0`
+
+GLIB_LIBRARY=glib-2.0
+
+
+libsoup_head = soup-address.h \
+	soup-auth-basic.h \
+	soup-auth-digest.h \
+	soup-auth-domain-basic.h \
+	soup-auth-domain-digest.h \
+	soup-auth-domain.h \
+	soup-auth-manager-ntlm.h \
+	soup-auth-manager.h \
+	soup-auth-ntlm.h \
+	soup-auth.h \
+ 	soup-connection.h \
+	soup-cookie-jar.h \
+	soup-cookie-jar-text.h 
+	soup-cookie.h \
+	soup-date.h \
+	soup-dns.h \
+	soup-enum-types.h \
+	soup-form.h \
+	soup-headers.h \
+	soup-logger.h \
+	soup-marshal.h \
+	soup-message-body.h \
+	soup-message-headers.h \
+	soup-message-queue.h \
+	soup-message.h \
+	soup-method.h \
+	soup-misc.h \
+	soup-multipart.h \
+	soup-path-map.h \
+	soup-portability.h \
+	soup-proxy-resolver-gnome.h \
+	soup-proxy-resolver-static.h \
+	soup-proxy-resolver.h \
+	soup-proxy-uri-resolver.h \
+	soup-server.h \
+	soup-session-async.h \
+	soup-session-feature.h \
+	soup-session-sync.h \
+	soup-session.h \
+	soup-socket.h \
+	soup-ssl.h \
+	soup-status.h \
+	soup-types.h \
+	soup-uri.h \
+	soup-value-utils.h \
+	soup-xmlrpc.h \
+	soup.h 
+
+
+libsoup-2.4.gir:
+	env PYTHONPATH=.:.. env LPATH=.libs $(SCANNER_BIN) $(SCANNER_ARGS) \
+            --namespace libsoup --nsversion=2.4 \
+            --noclosure \
+            --output $@ \
+            --strip-prefix=g \
+            --libtool="$(LIBTOOL)" \
+            -I/usr/local/include/gssdp-1.0 \
+            -I/usr/include/libxml2 \
+            -I/usr/local/include/gobject-introspection-1.0 \
+            -I$(GLIB_INCLUDEDIR) \
+            -I$(GLIB_LIBDIR)/glib-2.0/include \
+            --include=GObject-2.0 \
+            --library=soup-2.4 \
+            --pkg libsoup-2.4 \
+	    $(libsoup_head)
+
+libsoup-2.4.typelib: libsoup-2.4.gir
+	g-ir-compiler --includedir=. $(G_IR_COMPILER_OPTS)  -o $@ libsoup-2.4.gir
+
+
+
+
